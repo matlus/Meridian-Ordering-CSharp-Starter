@@ -19,7 +19,7 @@ Copy-Item .env.example .env
 Start SQL Server and RabbitMQ:
 
 ```powershell
-docker compose up -d sqlserver rabbitmq
+docker compose up -d order-store rabbitmq
 ```
 
 Start the optional Azure Service Bus emulator profile as well:
@@ -50,8 +50,10 @@ The empty starter test project deliberately contains no scenarios. Microsoft Tes
 | --- | --- |
 | `docs/requirements/` | Authoritative business and technical training inputs |
 | `docs/implementation-guide.md` | Recommended implementation and decision-making workflow |
-| `src/MeridianOrdering/` | Business-facing facade and implementation responsibility areas |
-| `src/MeridianOrdering.Api/` | Public ASP.NET Core application boundary |
+| `src/MeridianOrdering/DomainFacade.cs` | Named public application boundary |
+| `src/MeridianOrdering/Managers/` | Customer and ordering coordination, validation, gateways, messaging, and composition shells |
+| `src/MeridianOrdering/Managers/DataLayer/DataManagers/` | Persistence coordination shells inside the data-layer boundary |
+| `src/MeridianOrdering.Api/` | Startup-safe ASP.NET Core host and empty capability-specific controller shells |
 | `tests/MeridianOrdering.Tests/Acceptance/` | Functional acceptance scenarios written by students |
 | `infrastructure/` | Application-owned local provisioning placeholders |
 

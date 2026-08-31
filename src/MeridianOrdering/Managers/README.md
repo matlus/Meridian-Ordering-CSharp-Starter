@@ -1,3 +1,3 @@
 # Managers
 
-This area organizes responsibilities used to fulfill ordering capabilities behind the domain facade. Focused orchestration and abstractions belong here. Public HTTP behavior and infrastructure provisioning do not.
+This area organizes customer-registration and order-placement responsibilities behind the domain facade. Focused coordination and collaboration with validators, persistence, gateways, messaging, and composers belong here. Public HTTP behavior and infrastructure provisioning do not.
