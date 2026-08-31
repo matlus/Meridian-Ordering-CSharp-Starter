@@ -1,0 +1,71 @@
+name: meridian-ordering
+
+services:
+  order-store:
+    image: mcr.microsoft.com/mssql/server@sha256:4bab24f36c1ecd48e85f7d37df26e6bf301641d84c3fe652f9a0dcc947d512e1
+    pull_policy: missing
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: ${MERIDIAN_SQL_SA_PASSWORD:?Copy .env.example to .env before starting Compose}
+    ports:
+      - "${MERIDIAN_SQL_PORT:-1433}:1433"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$${MSSQL_SA_PASSWORD}" -C -Q "SELECT 1" || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    pull_policy: missing
+    restart: unless-stopped
+    ports:
+      - "${MERIDIAN_RABBITMQ_PORT:-5672}:5672"
+      - "${MERIDIAN_RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  servicebus-emulator:
+    profiles: ["service-bus"]
+    image: mcr.microsoft.com/azure-messaging/servicebus-emulator@sha256:5a96d893b245031740f7d46e0fe5ff282d24b78c4b7d761dd57590f3f010a9b3
+    pull_policy: missing
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      SQL_SERVER: servicebus-emulator-sql
+      MSSQL_SA_PASSWORD: ${MERIDIAN_SERVICEBUS_SQL_SA_PASSWORD:?Copy .env.example to .env before starting Compose}
+    ports:
+      - "${MERIDIAN_SERVICEBUS_PORT:-5673}:5672"
+      - "${MERIDIAN_SERVICEBUS_MANAGEMENT_PORT:-5301}:5300"
+    volumes:
+      - ./infrastructure/service-bus/Config.json:/ServiceBus_Emulator/ConfigFiles/Config.json:ro
+    depends_on:
+      servicebus-emulator-sql:
+        condition: service_healthy
+
+  servicebus-emulator-sql:
+    profiles: ["service-bus"]
+    image: mcr.microsoft.com/mssql/server@sha256:ba4c8329f48fb8f02e1416be6a930ebfd71268caee78aa985f3af4315e457c89
+    pull_policy: missing
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: ${MERIDIAN_SERVICEBUS_SQL_SA_PASSWORD:?Copy .env.example to .env before starting Compose}
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$${MSSQL_SA_PASSWORD}" -C -Q "SELECT 1" || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s

@@ -1,0 +1,32 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+[*.{json,yml,yaml,config,props,targets,csproj,slnx}]
+indent_size = 2
+
+[*.cs]
+max_line_length = 150
+
+# The var rule is reader-inference, not compiler-inference: use var when the
+# right-hand side names the type for a human (new X(...), casts, well-named
+# factories like GetCustomer()); spell the type when the right side is opaque.
+# No analyzer can judge "the name reveals the type", so these rules are left
+# non-enforcing and the judgment lives in review.
+csharp_style_var_for_built_in_types = true:silent
+csharp_style_var_when_type_is_apparent = true:silent
+csharp_style_var_elsewhere = false:silent
+
+dotnet_sort_system_directives_first = true
+csharp_style_namespace_declarations = file_scoped:warning
+
+# Unused usings and using-order/formatting are build failures like every other
+# warning (EnforceCodeStyleInBuild + TreatWarningsAsErrors in Directory.Build.props).
+dotnet_diagnostic.IDE0005.severity = warning
+dotnet_diagnostic.IDE0055.severity = warning
